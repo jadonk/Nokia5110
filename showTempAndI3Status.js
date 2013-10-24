@@ -7,7 +7,7 @@ var lcd, b, TMP36;
 
 if(true) {
     b = require('bonescript');
-    lcd = require('Nokia5110');
+    lcd = require('nokia5110');
     var oldLCDString = lcd.string;
     lcd.string = function(x){console.log('STRING: ' + x);oldLCDString(x);};
     var oldGotoXY = lcd.gotoXY;
@@ -87,7 +87,7 @@ function doI3Request() {
         console.log('SPACE: ' + space[1]);
         previousSpaceStatus = space[1];
         var showSpace = (space[1].match(/(open|closed)/i))[0];
-        while(showSpace.length < 5) {
+        while(showSpace.length < 6) {
             showSpace = showSpace + " ";
         }
         lcd.gotoXY(36, 1);
@@ -138,10 +138,13 @@ function doMeetupRequest() {
         meetupTime.setFullYear(now.getFullYear());
         console.log("meetupTime = " + meetupTime);
         console.log("now = " + now);
-        var meetupHours = ((meetupTime - now)/(1000*60*60)).toFixed(1);
-        console.log("MEETUP: " + meetupHours + " hours");
+        var meetupHours = ((meetupTime - now)/(1000*60*60)).toFixed(1) + "hrs";
+        while(meetupHours.length < 6) {
+            meetupHours = meetupHours + " ";
+        }
+        console.log("MEETUP: " + meetupHours);
         lcd.gotoXY(36, 2);
-        lcd.string(meetupHours + "hrs");
+        lcd.string(meetupHours);
       } catch(ex) {
         console.log('ERROR: ' + ex);
       }
