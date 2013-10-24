@@ -3,6 +3,7 @@
 // root@beaglebone:~# ntpdate pool.ntp.org
 
 var http = require('http');
+var os = require('os');
 var lcd, b, TMP36;
 
 if(true) {
@@ -33,10 +34,21 @@ if(true) {
     lcd.gotoXY = function(x,y){console.log('GOTOXY: ' + x + ',' + y);};
 }
 
+getIP();
 doI3Request();
 doMeetupRequest();
 setInterval(doI3Request, 60000);
 setInterval(doMeetupRequest, 4*60*60000);
+
+function getIP() {
+    try {
+        var ipAddr = os.networkInterfaces().eth0[0].address;
+        lcd.gotoXY(0, 5);
+        lcd.string(ipAddr);
+    } catch(ex) {
+        setTimeout(getIP, 10000);
+    }
+}
 
 function readTMP() {
     b.analogRead(TMP36, onReadTMP);
