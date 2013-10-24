@@ -43,7 +43,7 @@ function onReadTMP(x) {
     var tempC = (millivolts - 500) / 10;
     var tempF = (tempC * 9/5) + 32;
     lcd.gotoXY(36, 0);
-    lcd.string(tempF.toFixed(1) + "F");
+    lcd.string(tempF.toFixed(1) + " F");
 }
 
 var previousSpaceStatus = "";
