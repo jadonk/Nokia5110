@@ -1,3 +1,7 @@
+// root@beaglebone:~# rm /etc/localtime
+// root@beaglebone:~# ln -s /usr/share/zoneinfo/EST5EDT /etc/localtime
+// root@beaglebone:~# ntpdate pool.ntp.org
+
 var http = require('http');
 var lcd, b, TMP36;
 
