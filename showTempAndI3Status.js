@@ -1,24 +1,34 @@
-var lcd = require('Nokia5110');
 var http = require('http');
-var b = require('bonescript');
+var lcd, b, TMP36;
 
-var TMP36 = "P9_39";
+if(false) {
+    b = require('bonescript');
+    lcd = require('Nokia5110');
+    TMP36 = "P9_39";
+    lcd.PIN_SDIN = "P9_21";
+    lcd.PIN_SCLK = "P9_22";
+    lcd.PIN_SCE = "P9_23";
+    lcd.PIN_DC = "P9_24";
+    lcd.PIN_RESET = "P9_25";
+    lcd.setup();
+    lcd.clear();
+    lcd.gotoXY(0, 0);
+    lcd.string("  Temp:");
+    lcd.gotoXY(0, 1);
+    lcd.string("    I3:");
+    lcd.gotoXY(0, 2);
+    lcd.string("Meetup:");
+    setInterval(readTMP, 3000);
+} else {
+    lcd = {};
+    lcd.string = function(x){console.log('STRING: ' + x);};
+    lcd.gotoXY = function(){};
+}
 
-lcd.PIN_SDIN = "P9_21";
-lcd.PIN_SCLK = "P9_22";
-lcd.PIN_SCE = "P9_23";
-lcd.PIN_DC = "P9_24";
-lcd.PIN_RESET = "P9_25";
-lcd.setup();
-lcd.clear();
-lcd.gotoXY(0, 0);
-lcd.string("Temp:");
-lcd.gotoXY(0, 2);
-lcd.string("I3 status:");
-
-setInterval(readTMP, 3000);
 doI3Request();
+doMeetupRequest();
 setInterval(doI3Request, 60000);
+setInterval(doMeetupRequest, 4*60*60000);
 
 function readTMP() {
     b.analogRead(TMP36, onReadTMP);
@@ -28,17 +38,16 @@ function onReadTMP(x) {
     var millivolts = x.value * 1800;
     var tempC = (millivolts - 500) / 10;
     var tempF = (tempC * 9/5) + 32;
-    lcd.gotoXY(40, 0);
+    lcd.gotoXY(42, 0);
     lcd.string(tempF.toFixed(1));
 }
-
 
 var previousSpaceStatus = "";
 function doI3Request() {
   var req = http.get({hostname:'www.i3detroit.org'}, i3Request);
   req.on('error', function(e) {
     console.log('Problem with request: ' + e.message);
-    lcd.gotoXY(0, 3);
+    lcd.gotoXY(42, 1);
     lcd.string("N/A  ");
   });
 
@@ -47,7 +56,7 @@ function doI3Request() {
     if(res.statusCode != 200) {
       console.log('STATUS: ' + res.statusCode);
       console.log('HEADERS: ' + JSON.stringify(res.headers));
-      lcd.gotoXY(0, 3);
+      lcd.gotoXY(42, 1);
       lcd.string("N/A  ");
       return;
     }
@@ -73,8 +82,60 @@ function doI3Request() {
         while(showSpace.length < 5) {
             showSpace = showSpace + " ";
         }
-        lcd.gotoXY(0, 3);
+        lcd.gotoXY(42, 1);
         lcd.string(showSpace);
+      }
+    }
+  }
+}
+
+function doMeetupRequest() {
+  var req = http.get(
+    {
+      hostname:'www.meetup.com',
+      path:'/Southeast-Michigan-BeagleBone-Users-Group/events/rss/Southeast+Michigan+BeagleBone+User%27s+Group/',
+    }, meetupRequest
+  );
+  req.on('error', function(e) {
+    console.log('Problem with request: ' + e.message);
+    lcd.gotoXY(42, 2);
+    lcd.string("N/A  ");
+  });
+
+  var page = "";
+  function meetupRequest(res) {
+    if(res.statusCode != 200) {
+      //console.log('STATUS: ' + res.statusCode);
+      //console.log('HEADERS: ' + JSON.stringify(res.headers));
+      return;
+    }
+    res.setEncoding('utf8');
+    res.on('data', onData);
+    res.on('end', onEnd);
+  
+    function onData(chunk) {
+      page += chunk;
+      //console.log('BODY: ' + chunk);
+    }
+  
+    function onEnd() {
+      try {
+        var regex = /<description>.*<p>(.*)<\/p> <p>Attending:.*<\/description>/g;
+        var descriptions = regex.exec(page);
+        var nextMeetup = descriptions[1];
+        nextMeetup = nextMeetup.replace(/at /, "");
+        //console.log(nextMeetup);
+        var now = new Date();
+        var meetupTime = new Date(Date.parse(nextMeetup));
+        meetupTime.setFullYear(now.getFullYear());
+        //console.log(meetupTime);
+        //console.log(now);
+        var meetupHours = ((meetupTime - now)/(1000*60*60)).toFixed(1);
+        console.log("MEETUP: " + meetupHours + " hours");
+        lcd.gotoXY(42, 2);
+        lcd.string(meetupHours + "hrs");
+      } catch(ex) {
+        console.log('ERROR: ' + ex);
       }
     }
   }
