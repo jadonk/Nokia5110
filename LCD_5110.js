@@ -96,7 +96,17 @@ exports.write = function(dataORcommand, data, backToBack)
     if(!backToBack || lastSCE != b.LOW) {
         b.digitalWrite(this.PIN_SCE, b.LOW);
     }
-    b.shiftOut(this.PIN_SDIN, this.PIN_SCLK, b.MSBFIRST, data);
+    for(var i = 0; i < 8; i++) {
+        var bit = data & (1 << (7 - i));
+
+        if(bit) {
+            b.digitalWrite(this.PIN_SDIN, b.HIGH);
+        } else {
+            b.digitalWrite(this.PIN_SDIN, b.LOW);
+        }
+        b.digitalWrite(this.PIN_SCLK, b.HIGH);
+        b.digitalWrite(this.PIN_SCLK, b.LOW);
+    }
     if(!backToBack) {
         b.digitalWrite(this.PIN_SCE, b.HIGH);
         lastSCE = b.HIGH;

@@ -10,11 +10,14 @@ var inverseIndex;
 //
 //  Must define the following outputs to use LCD_5110.js
 //
-lcd.PIN_SDIN = "P9_21";
-lcd.PIN_SCLK = "P9_22";
-lcd.PIN_SCE = "P9_23";
-lcd.PIN_DC = "P9_24";
-lcd.PIN_RESET = "P9_25";
+lcd.PIN_SDIN = "P9_21";   // 6-MOSI (yellow)
+lcd.PIN_SCLK = "P9_22";   // 7-SCLK (orange)
+lcd.PIN_SCE = "P9_23";    // 3-SCE  (purple)
+lcd.PIN_DC = "P9_24";     // 5-D/C  (white)
+lcd.PIN_RESET = "P9_26";  // 4-RST  (gray)
+                // P9_3      1-VCC  (red)
+                // P9_1      2-GND  (black)
+                // P9_4      8-LED  (green)
 
 lcd.setup();
 setTimeout(loop, 0);
