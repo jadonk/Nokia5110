@@ -1,5 +1,5 @@
 {
-  "name": "Nokia5110",
+  "name": "nokia5110",
   "version": "0.0.1",
   "description": "Nokia 5110 LCD interface library for BeagleBone",
   "main": "LCD_5110.js",
